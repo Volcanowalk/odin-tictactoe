@@ -1,0 +1,26 @@
+body, html {
+    height: 100%;
+    margin: 0px;
+}
+
+body {
+    background-color: grey;
+}
+
+.board-cell {
+    border: 1px solid white;
+    height: 100px;
+    color: white;
+    display: flex;
+    font-size: 48px;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    display: grid;
+    grid-template-columns: 100px 100px 100px;
+    justify-content: center;
+    align-content: center;
+    height: 100%;
+}
