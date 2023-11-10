@@ -1,10 +1,14 @@
 const gameboard = (function() {
     const array = ['', '', '', '', '', '','', '', ''];
-    let player = 'player1'
+    let player = ""
     let turn = 0
 
     const addMarker = (index, marker) => {
         array[index] = marker
+    }
+
+    const removeMarker = (index) => {
+       array[index] = ''
     }
 
     const calculateWin = () => {
@@ -40,7 +44,7 @@ const gameboard = (function() {
         }
     }
 
-    return { addMarker, calculateWin, player }
+    return { addMarker, calculateWin, removeMarker, player, turn }
 })()
 
 function createPlayer(name, marker) {
@@ -49,32 +53,65 @@ function createPlayer(name, marker) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    let player1 = createPlayer('player1', 'X')
-    let player2 = createPlayer('player2', 'O')
-
     const boardCells = document.querySelectorAll('.board-cell')
-    const dialog = document.querySelector('dialog')
-    const dialog_text = document.querySelector('dialog p')
+    const dialog = document.querySelector('.dialog-restart')
+    const dialog_text = document.querySelector('.dialog-restart p')
+    const btnRestart = document.querySelector('.btnRestart')
+    const dialog_start = document.querySelector('.dialog-start')
+    const btnStart = document.querySelector('.btnStart')
+    const displayPlayer = document.querySelector('.display-current-player')
+    let player1Name, player2Name, player1, player2;
+
+    dialog_start.showModal()
+
+    btnStart.addEventListener('click', () => {
+	player1Name = document.querySelector('.player1-name').value
+        player2Name = document.querySelector('.player2-name').value
+
+	player1 = createPlayer(player1Name, 'X')
+	player2 = createPlayer(player2Name, 'O')
+        gameboard.player = player1.name
+        displayPlayer.textContent = player1.name
+
+	dialog_start.close()
+    })
 
     boardCells.forEach((boardCell) => {
         boardCell.addEventListener('click', () => {
             if(boardCell.textContent != 'X' && boardCell.textContent != 'O') {
                 //Current Marker
-                const player_current = gameboard.player === 'player1' ? player1 : player2
+                const player_current = gameboard.player === player1.name ? player1 : player2
                 //Mark on the board
                 boardCell.textContent = player_current.marker
                 //Add to array
                 gameboard.addMarker(boardCell.dataset.arrayIndex, player_current.marker)
                 //Switch player
-                gameboard.player = gameboard.player === 'player1' ? 'player2' : 'player1'
+                gameboard.player = gameboard.player === player1.name ? player2.name : player1.name
+                displayPlayer.textContent = gameboard.player
+		//Turn passes
+		gameboard.turn += 1;
+		console.log(gameboard.turn)
                 //Calculate if a row is completed
                 if(gameboard.calculateWin()){
                     dialog_text.textContent = `${player_current.name} has won!`
                     dialog.showModal()
-                }
+                } else if (!gameboard.calculateWin() && gameboard.turn === 9) {
+			dialog_text.textContent = "Tie!"
+			dialog.showModal()
+		}
             } else {
-                alert('Cannot perform action!')
+                alert('That tile has already been played!')
             }
         })
     })
+
+    btnRestart.addEventListener('click', () => {
+		boardCells.forEach((boardCell) => {
+			boardCell.textContent = ''
+			gameboard.removeMarker(boardCell.dataset.arrayIndex)
+			gameboard.player = player1.name
+		})
+		gameboard.turn = 0
+		dialog.close()
+	})
 })
